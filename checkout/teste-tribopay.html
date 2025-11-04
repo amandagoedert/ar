@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Integração TriboPay</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #f53d5c;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #f53d5c;
+        }
+        button {
+            background: #f53d5c;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #e02d49;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #f53d5c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .config-display {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+        .config-item {
+            margin: 8px 0;
+        }
+        .config-label {
+            font-weight: bold;
+            color: #495057;
+        }
+        .config-value {
+            color: #f53d5c;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste de Integração TriboPay</h1>
+        
+        <div class="test-section">
+            <h2>📋 Configuração Atual</h2>
+            <div id="config-display" class="config-display">
+                <div class="config-item">
+                    <span class="config-label">Token API:</span>
+                    <span class="config-value" id="token-display">Carregando...</span>
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Oferta Padrão:</span>
+                    <span class="config-value" id="offer-display">Carregando...</span>
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Produto Padrão:</span>
+                    <span class="config-value" id="product-display">Carregando...</span>
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Webhook URL:</span>
+                    <span class="config-value" id="webhook-display">Carregando...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>1️⃣ Teste de Valor Mínimo</h2>
+            <p>Verifica se o sistema valida o valor mínimo de R$ 5,00</p>
+            <button onclick="testarValorMinimo()">Testar Valor Mínimo</button>
+            <div id="result-minimo"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>2️⃣ Teste de Conversão de Valores</h2>
+            <p>Verifica se os valores estão sendo convertidos corretamente para centavos</p>
+            <button onclick="testarConversao()">Testar Conversão</button>
+            <div id="result-conversao"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>3️⃣ Teste de PIX Completo</h2>
+            <p>Faz uma requisição real à API TriboPay (VALOR MÍNIMO R$ 5,00)</p>
+            <button onclick="testarPixCompleto()">Gerar PIX de Teste (R$ 5,00)</button>
+            <button onclick="testarPixProduto()">Gerar PIX do Produto (R$ 109,97)</button>
+            <div id="result-pix"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>4️⃣ Teste de QR Code</h2>
+            <p>Verifica se o QR Code está sendo gerado corretamente</p>
+            <button onclick="testarQRCode()">Testar QR Code</button>
+            <div id="result-qrcode"></div>
+        </div>
+    </div>
+
+    <script>
+        // Carregar configuração
+        async function carregarConfiguracao() {
+            try {
+                // Tentar carregar do arquivo de configuração
+                const token = 'PEllrmnJPwmxEcghOgzi0RIFVO9JqcBlMBpYrCBtyFEKjPqPVzr9uPL4Ld9e';
+                const offerHash = 'ugg3tvujyf';
+                const productHash = '5crbkjmnrj';
+                const webhookUrl = 'https://tikt-ten.vercel.app/api/webhook';
+
+                document.getElementById('token-display').textContent = 
+                    token.substring(0, 10) + '...' + token.substring(token.length - 10);
+                document.getElementById('offer-display').textContent = offerHash;
+                document.getElementById('product-display').textContent = productHash;
+                document.getElementById('webhook-display').textContent = webhookUrl;
+            } catch (error) {
+                console.error('Erro ao carregar configuração:', error);
+            }
+        }
+
+        // Função auxiliar para converter valor para centavos
+        function toCents(value) {
+            if (typeof value === 'number') {
+                return Math.round(value * 100);
+            }
+            if (typeof value === 'string') {
+                let cleaned = value.replace(/[^\d,.]/g, '');
+                if (cleaned.includes(',')) {
+                    if (cleaned.includes('.') && cleaned.includes(',')) {
+                        cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+                    } else {
+                        cleaned = cleaned.replace(',', '.');
+                    }
+                }
+                return Math.round(parseFloat(cleaned) * 100);
+            }
+            return Math.round(parseFloat(value || 0) * 100);
+        }
+
+        // Teste 1: Valor Mínimo
+        function testarValorMinimo() {
+            const resultDiv = document.getElementById('result-minimo');
+            resultDiv.innerHTML = '<div class="loading"></div> Testando...';
+
+            const valoresParaTestar = [
+                { valor: 4.99, esperado: false, descricao: 'R$ 4,99 (abaixo do mínimo)' },
+                { valor: 5.00, esperado: true, descricao: 'R$ 5,00 (mínimo aceito)' },
+                { valor: 109.97, esperado: true, descricao: 'R$ 109,97 (valor do produto)' }
+            ];
+
+            let resultados = '<div class="result success">✅ Teste de Valor Mínimo:\n\n';
+            
+            valoresParaTestar.forEach(teste => {
+                const centavos = toCents(teste.valor);
+                const valido = centavos >= 500; // 500 centavos = R$ 5,00
+                const passou = valido === teste.esperado;
+                
+                resultados += `${passou ? '✅' : '❌'} ${teste.descricao}\n`;
+                resultados += `   Valor em centavos: ${centavos}\n`;
+                resultados += `   Validação: ${valido ? 'ACEITO' : 'REJEITADO'}\n\n`;
+            });
+
+            resultados += '</div>';
+            resultDiv.innerHTML = resultados;
+        }
+
+        // Teste 2: Conversão de Valores
+        function testarConversao() {
+            const resultDiv = document.getElementById('result-conversao');
+            resultDiv.innerHTML = '<div class="loading"></div> Testando conversões...';
+
+            const valoresParaTestar = [
+                { input: 109.97, esperado: 10997 },
+                { input: '109,97', esperado: 10997 },
+                { input: 'R$ 109,97', esperado: 10997 },
+                { input: 5.00, esperado: 500 },
+                { input: '5', esperado: 500 },
+                { input: 1000.50, esperado: 100050 }
+            ];
+
+            let resultados = '<div class="result success">✅ Teste de Conversão:\n\n';
+            
+            valoresParaTestar.forEach(teste => {
+                const resultado = toCents(teste.input);
+                const passou = resultado === teste.esperado;
+                
+                resultados += `${passou ? '✅' : '❌'} Input: ${JSON.stringify(teste.input)}\n`;
+                resultados += `   Esperado: ${teste.esperado} centavos\n`;
+                resultados += `   Obtido: ${resultado} centavos\n\n`;
+            });
+
+            resultados += '</div>';
+            resultDiv.innerHTML = resultados;
+        }
+
+        // Teste 3: PIX Completo (R$ 5,00)
+        async function testarPixCompleto() {
+            const resultDiv = document.getElementById('result-pix');
+            resultDiv.innerHTML = '<div class="loading"></div> Gerando PIX de teste...';
+
+            try {
+                const payload = {
+                    debtor_name: "Cliente Teste",
+                    email: "teste@email.com",
+                    debtor_document_number: "12345678900",
+                    phone: "11999999999",
+                    amount: 5.00,
+                    payment_method: "pix",
+                    address_street: "Rua Teste",
+                    address_number: "123",
+                    address_neighborhood: "Centro",
+                    address_city: "São Paulo",
+                    address_state: "SP",
+                    address_zipcode: "01234567",
+                    produtos: [{
+                        nome: "Produto de Teste",
+                        preco: 5.00,
+                        quantidade: 1,
+                        product_hash: "5crbkjmnrj",
+                        offer_hash: "ugg3tvujyf"
+                    }]
+                };
+
+                console.log('Payload de teste:', payload);
+
+                const response = await fetch('../api/api.js', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                console.log('Resposta da API:', data);
+
+                if (response.ok && data.pix) {
+                    let resultado = '<div class="result success">✅ PIX gerado com sucesso!\n\n';
+                    resultado += `Hash da Transação: ${data.hash}\n`;
+                    resultado += `Status: ${data.status}\n`;
+                    resultado += `Código PIX: ${data.pix.pix_qr_code ? data.pix.pix_qr_code.substring(0, 50) + '...' : 'N/A'}\n`;
+                    resultado += `\nQR Code: ${data.pix.qr_code_base64 ? '✅ Disponível' : '❌ Não disponível'}\n`;
+                    resultado += '</div>';
+                    
+                    // Exibir QR Code se disponível
+                    if (data.pix.qr_code_base64) {
+                        resultado += `<img src="${data.pix.qr_code_base64}" style="max-width: 200px; margin-top: 15px; border-radius: 8px;" alt="QR Code">`;
+                    }
+                    
+                    resultDiv.innerHTML = resultado;
+                } else {
+                    throw new Error(data.message || 'Erro ao gerar PIX');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">❌ Erro: ${error.message}\n\nDetalhes no console do navegador.</div>`;
+                console.error('Erro detalhado:', error);
+            }
+        }
+
+        // Teste 3B: PIX do Produto (R$ 109,97)
+        async function testarPixProduto() {
+            const resultDiv = document.getElementById('result-pix');
+            resultDiv.innerHTML = '<div class="loading"></div> Gerando PIX do produto...';
+
+            try {
+                const payload = {
+                    debtor_name: "Cliente Teste",
+                    email: "teste@email.com",
+                    debtor_document_number: "12345678900",
+                    phone: "11999999999",
+                    amount: 109.97,
+                    payment_method: "pix",
+                    address_street: "Rua Teste",
+                    address_number: "123",
+                    address_neighborhood: "Centro",
+                    address_city: "São Paulo",
+                    address_state: "SP",
+                    address_zipcode: "01234567",
+                    produtos: [{
+                        nome: "Ar Condicionado Portátil 2 em 1",
+                        preco: 109.97,
+                        quantidade: 1,
+                        product_hash: "5crbkjmnrj",
+                        offer_hash: "ugg3tvujyf",
+                        image: "images/imgprincipal.png"
+                    }]
+                };
+
+                console.log('Payload do produto:', payload);
+
+                const response = await fetch('../api/api.js', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                console.log('Resposta da API:', data);
+
+                if (response.ok && data.pix) {
+                    let resultado = '<div class="result success">✅ PIX gerado com sucesso!\n\n';
+                    resultado += `Hash da Transação: ${data.hash}\n`;
+                    resultado += `Status: ${data.status}\n`;
+                    resultado += `Valor: R$ 109,97\n`;
+                    resultado += `Produto: Ar Condicionado Portátil 2 em 1\n`;
+                    resultado += `Código PIX: ${data.pix.pix_qr_code ? data.pix.pix_qr_code.substring(0, 50) + '...' : 'N/A'}\n`;
+                    resultado += `\nQR Code: ${data.pix.qr_code_base64 ? '✅ Disponível' : '❌ Não disponível'}\n`;
+                    resultado += '</div>';
+                    
+                    // Exibir QR Code se disponível
+                    if (data.pix.qr_code_base64) {
+                        resultado += `<div style="margin-top: 15px; text-align: center;">`;
+                        resultado += `<img src="${data.pix.qr_code_base64}" style="max-width: 200px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);" alt="QR Code">`;
+                        resultado += `<p style="margin-top: 10px; font-size: 14px; color: #666;">Escaneie este QR Code para pagar</p>`;
+                        resultado += `</div>`;
+                    }
+                    
+                    resultDiv.innerHTML = resultado;
+                } else {
+                    throw new Error(data.message || 'Erro ao gerar PIX');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">❌ Erro: ${error.message}\n\nDetalhes no console do navegador.</div>`;
+                console.error('Erro detalhado:', error);
+            }
+        }
+
+        // Teste 4: QR Code
+        function testarQRCode() {
+            const resultDiv = document.getElementById('result-qrcode');
+            resultDiv.innerHTML = '<div class="loading"></div> Gerando QR Code...';
+
+            const codigoPixTeste = '00020126360014br.gov.bcb.pix0114123456789012345204000053039865802BR5925TESTE LOJA6009SAO PAULO62070503***6304ABCD';
+            
+            let resultado = '<div class="result success">✅ Teste de QR Code:\n\n';
+            resultado += 'Gerando QR Code a partir de um código PIX de exemplo...\n</div>';
+            resultado += '<div style="text-align: center; margin-top: 15px;">';
+            resultado += `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(codigoPixTeste)}" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);" alt="QR Code Teste" onload="console.log('QR Code carregado')" onerror="document.getElementById('result-qrcode').innerHTML += '<div class=\'result error\'>❌ Erro ao carregar QR Code. Verifique sua conexão com a internet.</div>'">`;
+            resultado += '<p style="margin-top: 10px; font-size: 14px; color: #666;">QR Code de exemplo gerado com sucesso!</p>';
+            resultado += '</div>';
+            
+            resultDiv.innerHTML = resultado;
+        }
+
+        // Carregar configuração ao abrir a página
+        window.addEventListener('DOMContentLoaded', carregarConfiguracao);
+    </script>
+</body>
+</html>

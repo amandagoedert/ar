@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "routes": [
+    { "src": "/$", "dest": "/Index.html" },
+    { "src": "/checkout/?$", "dest": "/checkout/index.html" },
+    { "src": "/loja/?$", "dest": "/loja/index.html" },
+    { "src": "/carrinho/?$", "dest": "/carrinho/index.html" },
+    { "src": "/chat/?$", "dest": "/chat/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, X-Requested-With" },
+        { "key": "Vary", "value": "Origin" }
+      ]
+    }
+  ]
+}
