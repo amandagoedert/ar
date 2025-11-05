@@ -2946,7 +2946,18 @@ function toggleSave() {
           
           const productTitle = titleEl ? titleEl.textContent.trim() : 'Ar Condicionado Portátil 2 em 1';
           const productPriceText = priceEl ? priceEl.textContent : 'R$ 109,97';
-          const productImage = imgEl ? imgEl.getAttribute('src') : 'images/imgprincipal.png';
+          
+          // Normaliza o path da imagem para funcionar no Vercel e localhost
+          let productImage = imgEl ? imgEl.getAttribute('src') : 'images/imgprincipal.png';
+          if (productImage && !productImage.startsWith('http')) {
+            // Remove ./ ou ../ do início
+            productImage = productImage.replace(/^(\.\.\/|\.\/)/, '');
+            // Garante que começa com images/
+            if (!productImage.startsWith('images/')) {
+              productImage = 'images/' + productImage;
+            }
+          }
+          
           const productData = productsMap[productId] || {};
           const productHash = productData.productHash || productData.product_hash || DEFAULT_PRODUCT_HASH;
           const offerHash = productData.offerHash || productData.offer_hash || DEFAULT_OFFER_HASH;

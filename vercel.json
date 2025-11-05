@@ -15,6 +15,14 @@
         { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, X-Requested-With" },
         { "key": "Vary", "value": "Origin" }
       ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
     }
-  ]
+  ],
+  "trailingSlash": false,
+  "cleanUrls": false
 }

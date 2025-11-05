@@ -1,0 +1,17 @@
+# Ignorar apenas arquivos desnecessários
+node_modules
+.env
+*.log
+.DS_Store
+_dev/
+
+# NÃO ignorar imagens e arquivos estáticos
+!images/
+!*.html
+!*.css
+!*.js
+!*.png
+!*.jpg
+!*.jpeg
+!*.svg
+!*.gif
