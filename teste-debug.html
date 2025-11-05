@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Debug - Vercel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #0070f3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0051cc;
+        }
+        .result {
+            background: #f0f0f0;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .success { border-left: 4px solid #28a745; }
+        .error { border-left: 4px solid #dc3545; }
+        img {
+            max-width: 200px;
+            margin: 10px;
+            border: 2px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnóstico Vercel</h1>
+    
+    <div class="test-section">
+        <h2>1. Teste de Imagens</h2>
+        <p>Verificando se as imagens carregam:</p>
+        <img src="images/imgprincipal.png" alt="Principal" onerror="this.style.border='2px solid red'">
+        <img src="images/logotipo.png" alt="Logo" onerror="this.style.border='2px solid red'">
+        <img src="images/perfil1.png" alt="Perfil 1" onerror="this.style.border='2px solid red'">
+        <img src="images/perfil7.png" alt="Perfil 7" onerror="this.style.border='2px solid red'">
+        <div class="result" id="image-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Teste de LocalStorage</h2>
+        <button onclick="testLocalStorage()">Testar LocalStorage</button>
+        <button onclick="clearAllStorage()">Limpar Storage</button>
+        <div class="result" id="storage-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Teste de Carrinho</h2>
+        <button onclick="testCart()">Simular Adicionar ao Carrinho</button>
+        <button onclick="readCart()">Ler Carrinho</button>
+        <div class="result" id="cart-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Teste de Redirecionamento</h2>
+        <button onclick="testRedirect()">Testar Redirect para Checkout</button>
+        <div class="result" id="redirect-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>5. Informações do Ambiente</h2>
+        <div class="result" id="env-info"></div>
+    </div>
+
+    <script>
+        // Mostrar informações do ambiente ao carregar
+        window.addEventListener('load', () => {
+            const info = {
+                'URL': window.location.href,
+                'Origin': window.location.origin,
+                'Protocol': window.location.protocol,
+                'Hostname': window.location.hostname,
+                'User Agent': navigator.userAgent.substring(0, 100) + '...',
+                'LocalStorage Disponível': typeof(Storage) !== 'undefined',
+                'Cookies Habilitados': navigator.cookieEnabled
+            };
+            document.getElementById('env-info').textContent = JSON.stringify(info, null, 2);
+
+            // Verificar imagens
+            setTimeout(() => {
+                const imgs = document.querySelectorAll('img');
+                let loaded = 0, failed = 0;
+                imgs.forEach(img => {
+                    if (img.complete && img.naturalHeight !== 0) loaded++;
+                    else failed++;
+                });
+                document.getElementById('image-result').textContent = 
+                    `✅ Carregadas: ${loaded}\n❌ Falharam: ${failed}`;
+                document.getElementById('image-result').className = 
+                    failed > 0 ? 'result error' : 'result success';
+            }, 2000);
+        });
+
+        function testLocalStorage() {
+            const result = document.getElementById('storage-result');
+            try {
+                const testKey = 'vercel_test_' + Date.now();
+                const testValue = { test: 'dados de teste', timestamp: new Date().toISOString() };
+                
+                // Testar escrita
+                localStorage.setItem(testKey, JSON.stringify(testValue));
+                result.textContent = '✅ Escrita bem-sucedida\n';
+                
+                // Testar leitura imediata
+                const read = localStorage.getItem(testKey);
+                result.textContent += '✅ Leitura bem-sucedida\n';
+                result.textContent += 'Dados lidos: ' + read + '\n\n';
+                
+                // Limpar teste
+                localStorage.removeItem(testKey);
+                result.textContent += '✅ Remoção bem-sucedida\n\n';
+                
+                // Mostrar todas as chaves
+                result.textContent += 'Chaves no localStorage:\n';
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    result.textContent += `  ${i + 1}. ${key}\n`;
+                }
+                
+                result.className = 'result success';
+            } catch (error) {
+                result.textContent = '❌ ERRO: ' + error.message + '\n\n' + error.stack;
+                result.className = 'result error';
+            }
+        }
+
+        function clearAllStorage() {
+            localStorage.clear();
+            document.getElementById('storage-result').textContent = '🗑️ LocalStorage limpo!';
+            document.getElementById('storage-result').className = 'result';
+        }
+
+        function testCart() {
+            const result = document.getElementById('cart-result');
+            try {
+                const cartItem = {
+                    id: 'teste-produto',
+                    name: 'Ar Condicionado Portátil 2 em 1',
+                    price: 109.97,
+                    quantity: 1,
+                    image: 'images/imgprincipal.png',
+                    productHash: '5crbkjmnrj',
+                    offerHash: 'ugg3tvujyf',
+                    gatewayName: 'Com ter a casa refrigerada o verao'
+                };
+
+                const items = [cartItem];
+                const serialized = JSON.stringify(items);
+
+                // Salvar em múltiplas chaves
+                localStorage.setItem('tiktokShopCart', serialized);
+                localStorage.setItem('cart', serialized);
+
+                result.textContent = '✅ Carrinho salvo com sucesso!\n\n';
+                result.textContent += 'Dados salvos:\n' + JSON.stringify(items, null, 2);
+                result.className = 'result success';
+
+                // Verificar
+                setTimeout(() => {
+                    const check = localStorage.getItem('tiktokShopCart');
+                    result.textContent += '\n\n✅ Verificação: ' + (check ? 'Dados encontrados' : '❌ DADOS NÃO ENCONTRADOS!');
+                }, 100);
+            } catch (error) {
+                result.textContent = '❌ ERRO: ' + error.message;
+                result.className = 'result error';
+            }
+        }
+
+        function readCart() {
+            const result = document.getElementById('cart-result');
+            try {
+                const cart1 = localStorage.getItem('tiktokShopCart');
+                const cart2 = localStorage.getItem('cart');
+
+                result.textContent = 'tiktokShopCart:\n' + (cart1 || '(vazio)') + '\n\n';
+                result.textContent += 'cart:\n' + (cart2 || '(vazio)');
+                result.className = cart1 || cart2 ? 'result success' : 'result error';
+            } catch (error) {
+                result.textContent = '❌ ERRO: ' + error.message;
+                result.className = 'result error';
+            }
+        }
+
+        function testRedirect() {
+            const result = document.getElementById('redirect-result');
+            try {
+                // Salvar carrinho antes de redirecionar
+                const cartItem = {
+                    id: 'teste-redirect',
+                    name: 'Produto Teste Redirect',
+                    price: 99.99,
+                    quantity: 1,
+                    image: 'images/imgprincipal.png'
+                };
+                localStorage.setItem('tiktokShopCart', JSON.stringify([cartItem]));
+                
+                result.textContent = '✅ Carrinho salvo\n⏳ Redirecionando em 2 segundos...';
+                result.className = 'result';
+
+                setTimeout(() => {
+                    const checkoutUrl = new URL('checkout/index.html', window.location.href);
+                    result.textContent += '\n\n🔗 URL de destino: ' + checkoutUrl.toString();
+                    
+                    setTimeout(() => {
+                        window.location.assign(checkoutUrl.toString());
+                    }, 1000);
+                }, 2000);
+            } catch (error) {
+                result.textContent = '❌ ERRO: ' + error.message;
+                result.className = 'result error';
+            }
+        }
+    </script>
+</body>
+</html>
