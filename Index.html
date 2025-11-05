@@ -1478,7 +1478,7 @@
         <section id="visao-geral-section" class="product-images">
             <div class="image-container">
                 <img alt="" class="product-main-image" id="main-product-image"
-                    src="images/imgprincipal.png">
+                    src="/images/imgprincipal.png">
                 <div class="image-loading" id="image-loading">Carregando...</div>
                 <div class="image-counter" id="image-counter">1/6</div>
                 <div class="swipe-indicator left" onclick="previousImage()">←</div>
@@ -1688,7 +1688,7 @@
                 <div class="review-item">
                     <div class="review-header">
                         <div class="review-avatar">
-                            <img alt="C**l* S**t**" src="images/perfil1.png"
+                            <img alt="C**l* S**t**" src="/images/perfil1.png"
                                 style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                         </div>
                         <div style="display: flex; flex-direction: column;">
@@ -1702,7 +1702,7 @@
                     <div class="review-item">
                         <div class="review-header">
                             <div class="review-avatar">
-                                <img alt="Beatriz Lima" src="images/perfil2.png"
+                                <img alt="Beatriz Lima" src="/images/perfil2.png"
                                     style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                             </div>
                             <div style="display: flex; flex-direction: column;">
@@ -1717,7 +1717,7 @@
                     <div class="review-item">
                         <div class="review-header">
                             <div class="review-avatar">
-                                <img alt="Patrícia Rodrigues" src="images/perfil3.png"
+                                <img alt="Patrícia Rodrigues" src="/images/perfil3.png"
                                     style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                             </div>
                             <div style="display: flex; flex-direction: column;">
@@ -1732,7 +1732,7 @@
                     <div class="review-item">
                         <div class="review-header">
                             <div class="review-avatar">
-                                <img alt="Ana Paula Silva" src="images/perfil4.png"
+                                <img alt="Ana Paula Silva" src="/images/perfil4.png"
                                     style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                             </div>
                             <div style="display: flex; flex-direction: column;">
@@ -1747,7 +1747,7 @@
                     <div class="review-item">
                         <div class="review-header">
                             <div class="review-avatar">
-                                <img alt="Juliana Oliveira" src="images/perfil5.png"
+                                <img alt="Juliana Oliveira" src="/images/perfil5.png"
                                     style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                             </div>
                             <div style="display: flex; flex-direction: column;">
@@ -1762,7 +1762,7 @@
                     <div class="review-item">
                         <div class="review-header">
                             <div class="review-avatar">
-                                <img alt="Mariana Costa" src="images/perfil6.png"
+                                <img alt="Mariana Costa" src="/images/perfil6.png"
                                     style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                             </div>
                             <div style="display: flex; flex-direction: column;">
@@ -1778,7 +1778,7 @@
                     <div class="review-item">
                         <div class="review-header">
                             <div class="review-avatar">
-                                <img alt="Fernanda Oliveira" src="images/perfil7.png"
+                                <img alt="Fernanda Oliveira" src="/images/perfil7.png"
                                     style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                             </div>
                             <div style="display: flex; flex-direction: column;">
@@ -2957,14 +2957,18 @@ function toggleSave() {
             imgEl: !!imgEl
           });
           
-          // Normaliza o path da imagem para funcionar no Vercel e localhost
-          let productImage = imgEl ? imgEl.getAttribute('src') : 'images/imgprincipal.png';
+          // Normaliza o path da imagem para usar caminho absoluto no Vercel
+          let productImage = imgEl ? imgEl.getAttribute('src') : '/images/imgprincipal.png';
           if (productImage && !productImage.startsWith('http')) {
             // Remove ./ ou ../ do início
             productImage = productImage.replace(/^(\.\.\/|\.\/)/, '');
-            // Garante que começa com images/
-            if (!productImage.startsWith('images/')) {
-              productImage = 'images/' + productImage;
+            // Garante que começa com /images/ (absoluto)
+            if (!productImage.startsWith('/images/')) {
+              if (productImage.startsWith('images/')) {
+                productImage = '/' + productImage;
+              } else {
+                productImage = '/images/' + productImage;
+              }
             }
           }
           

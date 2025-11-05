@@ -760,7 +760,7 @@
         const quantity = normalizeQuantity(item);
         const displayName = item.name || item.title || 'Produto';
         
-        // CORREÇÃO DOS CAMINHOS DE IMAGEM
+        // CORREÇÃO DOS CAMINHOS DE IMAGEM - USA ABSOLUTOS
         let imagePath = item.image || '';
         
         if (imagePath) {
@@ -768,18 +768,18 @@
             if (!imagePath.startsWith('http')) {
                 // Remove qualquer ../ ou ./ do início
                 imagePath = imagePath.replace(/^(\.\.\/|\.\/)/, '');
-                // Adiciona ../ para voltar uma pasta (já que checkout está em subpasta)
-                if (!imagePath.startsWith('../')) {
-                    imagePath = '../' + imagePath;
+                // Garante que começa com / (caminho absoluto)
+                if (!imagePath.startsWith('/')) {
+                    imagePath = '/' + imagePath;
                 }
             }
         } else {
-            imagePath = '../images/ndaq.png';
+            imagePath = '/images/ndaq.png';
         }
         
         html += `
             <div class="product-card">
-                <img src="${imagePath}" alt="${displayName}" onerror="this.onerror=null;this.src='../images/ndaq.png'">
+                <img src="${imagePath}" alt="${displayName}" onerror="this.onerror=null;this.src='/images/ndaq.png'">
                 <div class="product-info">
                     <h4>${displayName}</h4>
                     <p>${formatPrice(priceValue)} <small>${formatPrice(originalPrice)}</small></p>
