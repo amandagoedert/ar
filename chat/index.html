@@ -775,12 +775,8 @@
             addMessageToChat("Visitar loja", 'sent');
             
             setTimeout(() => {
-                addMessageToChat("Redirecionando você para nossa loja oficial no TikTok Shop...", 'received', true);
-                
-                setTimeout(() => {
-                    window.location.href = "../";
-                }, 4000);
-            }, 1000);
+                addMessageToChat("Loja indisponível no momento.", 'received', true);
+            }, 800);
         }
         
         function goBack() {
