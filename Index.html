@@ -2933,11 +2933,15 @@ function toggleSave() {
         buyButton.addEventListener('click', (event) => {
           event.preventDefault();
           
+          console.log('[DEBUG] Botão Comprar clicado');
+          console.log('[DEBUG] productId recebido:', productId);
+          console.log('[DEBUG] localStorage disponível:', typeof localStorage !== 'undefined');
+          
           // Limpa completamente o carrinho antes de adicionar o novo produto
           localStorage.removeItem(CART_KEY);
           localStorage.removeItem(LEGACY_CART_KEY);
           localStorage.removeItem('cart');
-          console.log('Carrinho limpo');
+          console.log('[DEBUG] Carrinho limpo');
           
           // Captura as informações do produto da página
           const titleEl = document.getElementById('product-title');
@@ -2946,6 +2950,12 @@ function toggleSave() {
           
           const productTitle = titleEl ? titleEl.textContent.trim() : 'Ar Condicionado Portátil 2 em 1';
           const productPriceText = priceEl ? priceEl.textContent : 'R$ 109,97';
+          
+          console.log('[DEBUG] Elementos encontrados:', {
+            titleEl: !!titleEl,
+            priceEl: !!priceEl,
+            imgEl: !!imgEl
+          });
           
           // Normaliza o path da imagem para funcionar no Vercel e localhost
           let productImage = imgEl ? imgEl.getAttribute('src') : 'images/imgprincipal.png';
@@ -2963,11 +2973,17 @@ function toggleSave() {
           const offerHash = productData.offerHash || productData.offer_hash || DEFAULT_OFFER_HASH;
           const gatewayName = productData.gatewayName || productData.gateway_name || DEFAULT_GATEWAY_NAME;
           
-          console.log('Dados capturados:', { productTitle, productPriceText, productImage });
+          console.log('[DEBUG] Dados capturados:', { 
+            productTitle, 
+            productPriceText, 
+            productImage,
+            productHash,
+            offerHash
+          });
           
           // Parse do preço
           const priceValue = parsePrice(productPriceText);
-          console.log('Preço parseado:', priceValue);
+          console.log('[DEBUG] Preço parseado:', priceValue);
           
           // Cria o item do carrinho com as informações capturadas
           const cartItem = {
@@ -2981,27 +2997,46 @@ function toggleSave() {
             gatewayName
           };
           
-          console.log('Item do carrinho criado:', cartItem);
+          console.log('[DEBUG] Item do carrinho criado:', cartItem);
           
-          // Define o carrinho com apenas este item
+          // Define o carrinho com apenas este item - SÍNCRONO
           try {
             const items = [cartItem];
-            setCart(items);
-            const serialized = localStorage.getItem('tiktokShopCart');
-            console.log('Carrinho salvo no localStorage:', serialized);
-            console.log('Verificação - tiktokShopCart:', localStorage.getItem('tiktokShopCart'));
-            console.log('Verificação - cart:', localStorage.getItem('cart'));
+            const normalized = normalizeCartItems(items);
+            const serialized = JSON.stringify(normalized);
+            
+            // Salva de forma explícita
+            localStorage.setItem(CART_KEY, serialized);
+            localStorage.setItem(LEGACY_CART_KEY, serialized);
+            localStorage.setItem('cart', serialized);
+            
+            console.log('[DEBUG] Carrinho salvo no localStorage');
+            console.log('[DEBUG] Serializado:', serialized);
+            
+            // Verifica imediatamente se foi salvo
+            const verificacao = localStorage.getItem(CART_KEY);
+            console.log('[DEBUG] Verificação imediata:', verificacao);
+            
+            if (!verificacao) {
+              alert('ERRO: Não foi possível salvar no localStorage!');
+              return;
+            }
           } catch (error) {
-            console.error('Erro ao salvar carrinho:', error);
+            console.error('[DEBUG] Erro ao salvar carrinho:', error);
+            alert('Erro ao salvar carrinho: ' + error.message);
+            return;
           }
           
           updateCartBadge();
           
-          // Redireciona para o checkout após um pequeno delay para garantir que salvou
-          console.log('Redirecionando para checkout...');
+          console.log('[DEBUG] Redirecionando para checkout em 200ms...');
+          
+          // Redireciona para o checkout após garantir que salvou
           setTimeout(() => {
+            const finalCheck = localStorage.getItem(CART_KEY);
+            console.log('[DEBUG] Verificação final antes do redirect:', finalCheck);
             redirectToCheckout();
-          }, 100);
+          }, 200);
         });
         buyButton.dataset.checkoutBound = 'true';
       }
