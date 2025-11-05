@@ -779,7 +779,7 @@
                             <span class="select-indicator ${isSelected ? 'checked' : ''}"></span>
                         </label>
                         <div class="cart-item-image">
-                            <img src="${imagePath}" alt="${displayName}" onerror="this.src='../images/ndaq.png'">
+                            <img src="${imagePath}" alt="${displayName}" onerror="this.src='/images/ndaq.png'">
                         </div>
                         <div class="cart-item-details">
                             <div class="cart-item-name">${displayName}</div>
@@ -826,7 +826,7 @@
                 const showFrete = (product.badges || []).some((badge) => badge.toLowerCase().includes('frete'));
                 return `
                 <article class="recommendation-card">
-                    <img src="${product.image}" alt="${product.title}" onerror="this.src='../images/ndaq.png'">
+                    <img src="${product.image}" alt="${product.title}" onerror="this.src='/images/ndaq.png'">
                     <div class="recommendation-title">${product.title}</div>
                     <div class="recommendation-price-row">
                         <div class="recommendation-price">${priceLabel}</div>
