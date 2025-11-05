@@ -1,33 +1,10 @@
 {
-  "routes": [
-    {
-      "src": "/images/(.*)",
-      "dest": "/images/$1"
-    },
-    {
-      "src": "/js/(.*)",
-      "dest": "/js/$1"
-    },
-    {
-      "src": "^/$",
-      "dest": "/Index.html"
-    },
-    {
-      "src": "^/checkout/?$",
-      "dest": "/checkout/index.html"
-    },
-    {
-      "src": "^/loja/?$",
-      "dest": "/loja/index.html"
-    },
-    {
-      "src": "^/carrinho/?$",
-      "dest": "/carrinho/index.html"
-    },
-    {
-      "src": "^/chat/?$",
-      "dest": "/chat/index.html"
-    }
+  "rewrites": [
+    { "source": "/", "destination": "/Index.html" },
+    { "source": "/checkout", "destination": "/checkout/index.html" },
+    { "source": "/loja", "destination": "/loja/index.html" },
+    { "source": "/carrinho", "destination": "/carrinho/index.html" },
+    { "source": "/chat", "destination": "/chat/index.html" }
   ],
   "headers": [
     {
@@ -42,8 +19,7 @@
     {
       "source": "/images/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
     }
   ]
