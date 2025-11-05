@@ -1,11 +1,10 @@
 {
-  "version": 2,
-  "routes": [
-    { "src": "/$", "dest": "/Index.html" },
-    { "src": "/checkout/?$", "dest": "/checkout/index.html" },
-    { "src": "/loja/?$", "dest": "/loja/index.html" },
-    { "src": "/carrinho/?$", "dest": "/carrinho/index.html" },
-    { "src": "/chat/?$", "dest": "/chat/index.html" }
+  "rewrites": [
+    { "source": "/", "destination": "/Index.html" },
+    { "source": "/checkout", "destination": "/checkout/index.html" },
+    { "source": "/loja", "destination": "/loja/index.html" },
+    { "source": "/carrinho", "destination": "/carrinho/index.html" },
+    { "source": "/chat", "destination": "/chat/index.html" }
   ],
   "headers": [
     {
